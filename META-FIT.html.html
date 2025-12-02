@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaFit App</title>
+<style>
+  * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { margin: 0; background: #111; color: #fff; }
+
+  .hidden { display: none; }
+  .screen {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px;
+    text-align: center;
+    background: linear-gradient(180deg, #1c1c1c, #000);
+  }
+  .active { display: flex; }
+
+  .logo {
+    font-size: 48px;
+    color: #f0b434;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  input, select {
+    background: #333;
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    width: 80%;
+    margin: 6px 0;
+    text-align: center;
+  }
+
+  button {
+    background: #f0b434;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+  }
+  button:hover { background: #ffc94d; }
+
+  .menu button {
+    width: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin: 6px auto;
+    padding: 14px 20px;
+  }
+
+  .menu-icon { font-size: 20px; }
+
+  .logout { background: #900; }
+
+  .content-box {
+    background: #222;
+    border-radius: 15px;
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto;
+    text-align: left;
+  }
+
+  h2 { color: #f0b434; }
+
+  a { color: #f0b434; cursor: pointer; text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div class="screen active" id="loginScreen">
+  <div class="logo">MetaFit</div>
+  <h2>Iniciar sesión</h2>
+  <input type="email" id="loginEmail" placeholder="Correo electrónico">
+  <input type="password" id="loginPassword" placeholder="Contraseña">
+  <button onclick="login()">Entrar</button>
+  <p>¿No tienes cuenta? <a onclick="showScreen('registerScreen')">Regístrate</a></p>
+</div>
+
+<!-- ===== REGISTRO ===== -->
+<div class="screen" id="registerScreen">
+  <div class="logo">MetaFit</div>
+  <h2>Registro</h2>
+  <input type="text" id="regName" placeholder="Nombre completo">
+  <input type="email" id="regEmail" placeholder="Correo electrónico">
+  <input type="password" id="regPassword" placeholder="Contraseña">
+  <input type="number" id="regEdad" placeholder="Edad">
+  <input type="number" id="regPeso" placeholder="Peso (kg)">
+  <input type="number" id="regAltura" placeholder="Altura (cm)">
+  <button onclick="register()">Crear cuenta</button>
+  <p>¿Ya tienes cuenta? <a onclick="showScreen('loginScreen')">Inicia sesión</a></p>
+</div>
+
+<!-- ===== MENÚ ===== -->
+<div class="screen" id="menuScreen">
+  <div class="logo" style="font-size:38px;">Menú MetaFit</div>
+  <div class="menu">
+    <button onclick="openSection('imc')">💪 Mi IMC</button>
+    <button onclick="openSection('carga')">🏋️ Recomendaciones de carga</button>
+    <button onclick="openSection('rutina')">📅 Mi rutina</button>
+    <button onclick="openSection('dieta')">🥗 Mi dieta</button>
+    <button onclick="openSection('salud')">⚕️ Prevención y salud</button>
+    <button onclick="openSection('seguimiento')">📊 Seguimiento y progreso</button>
+    <button onclick="openSection('config')">⚙️ Configuración</button>
+    <button class="logout" onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- ===== IMC ===== -->
+<div class="screen" id="imcScreen">
+  <h2>Índice de Masa Corporal (IMC)</h2>
+  <div class="content-box">
+    <p>El IMC relaciona tu peso y altura para determinar tu rango corporal.</p>
+    <input type="number" id="altura" placeholder="Altura (cm)">
+    <input type="number" id="peso" placeholder="Peso (kg)">
+    <button onclick="calcularIMC()">Calcular IMC</button>
+    <p id="resultadoIMC"></p>
+  </div>
+  <button onclick="showScreen('menuScreen')">Volver</button>
+</div>
+
+<!-- ===== CARGA ===== -->
+<div class="screen" id="cargaScreen">
+  <h2>Recomendaciones de carga</h2>
+  <div class="content-box">
+    <p id="cargaTexto">Calcula tu IMC primero para obtener recomendaciones personalizadas.</p>
+  </div>
+  <button onclick="showScreen('menuScreen')">Volver</button>
+</div>
+
+<!-- ===== RUTINA ===== -->
+<div class="screen" id="rutinaScreen">
+  <h2>Rutina semanal</h2>
+  <div class="content-box" id="rutinaBox">
+    <p>Tu rutina se generará según tus recomendaciones de carga.</p>
+  </div>
+  <button onclick="showScreen('menuScreen')">Volver</button>
+</div>
+
+<!-- ===== DIETA ===== -->
+<div class="screen" id="dietaScreen">
+  <h2>Plan alimenticio personalizado</h2>
+  <div class="content-box" id="dietaBox">
+    <p>Para crear tu plan semanal, indica tus alergias y preferencias:</p>
+    <input type="text" id="alergias" placeholder="Alergias (ej. lactosa, gluten)">
+    <select id="preferencia">
+      <option value="">Selecciona tu preferencia</option>
+      <option value="normal">Omnívora</option>
+      <option value="vegetariana">Vegetariana</option>
+      <option value="vegana">Vegana</option>
+    </select>
+    <button onclick="generarDieta()">Generar dieta</button>
+    <div id="dietaSemana"></div>
+    <p style="margin-top:10px; color:#f0b434"><i>“Consulta con un nutriólogo antes de seguir con los planes específicos.”</i></p>
+  </div>
+  <button onclick="showScreen('menuScreen')">Volver</button>
+</div>
+
+<!-- ===== PREVENCIÓN ===== -->
+<div class="screen" id="saludScreen">
+  <h2>Prevención y salud</h2>
+  <div class="content-box">
+    <h3>Rabdomiólisis</h3>
+    <p>Es la destrucción del tejido muscular liberando proteínas dañinas en la sangre. 
+    <b>Síntomas:</b> dolor muscular intenso, debilidad, orina oscura. 
+    <b>Prevención:</b> evita el sobreesfuerzo, hidrátate y descansa.</p>
+    <h3>Lesiones por sobrecarga</h3>
+    <ul>
+      <li>Tendinitis</li>
+      <li>Esguinces</li>
+      <li>Distensiones musculares</li>
+      <li>Dolor lumbar</li>
+    </ul>
+    <h3>Golpe de calor y deshidratación</h3>
+    <p>Ocurre por exceso de temperatura corporal. 
+    <b>Prevención:</b> hidrátate, evita entrenar bajo el sol directo y usa ropa ligera.</p>
+    <h3>Sobreentrenamiento</h3>
+    <p>Ejercicio excesivo sin descanso adecuado. 
+    <b>Prevención:</b> duerme bien, alterna días de trabajo y recuperación.</p>
+  </div>
+  <button onclick="showScreen('menuScreen')">Volver</button>
+</div>
+
+<!-- ===== SEGUIMIENTO ===== -->
+<div class="screen" id="seguimientoScreen">
+  <h2>Seguimiento y progreso</h2>
+  <div class="content-box">
+    <input type="number" id="pesoActual" placeholder="Peso actual (kg)">
+    <button onclick="guardarProgreso()">Guardar progreso</button>
+    <p id="mensajeProgreso"></p>
+  </div>
+  <button onclick="showScreen('menuScreen')">Volver</button>
+</div>
+
+<!-- ===== CONFIGURACIÓN ===== -->
+<div class="screen" id="configScreen">
+  <h2>Configuración</h2>
+  <div class="content-box">
+    <p>Cambiar datos (simulado):</p>
+    <input type="text" id="configNombre" placeholder="Nuevo nombre">
+    <input type="password" id="configPass" placeholder="Nueva contraseña">
+    <button onclick="actualizarConfig()">Guardar</button>
+    <p id="mensajeConfig"></p>
+  </div>
+  <button onclick="showScreen('menuScreen')">Volver</button>
+</div>
+
+<script>
+let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+let usuarioActivo = null;
+let imcGlobal = null;
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function register(){
+  const n = regName.value.trim(), e = regEmail.value.trim(), p = regPassword.value.trim();
+  const edad = regEdad.value, peso = regPeso.value, alt = regAltura.value;
+  if(!n || !e || !p || !edad || !peso || !alt) return alert("Completa todos los campos.");
+  if(usuarios.find(u=>u.email===e)) return alert("Ya existe una cuenta con este correo.");
+  usuarios.push({nombre:n,email:e,pass:p,edad,peso,altura:alt});
+  localStorage.setItem('usuarios',JSON.stringify(usuarios));
+  alert("Registro exitoso.");
+  showScreen('loginScreen');
+}
+
+function login(){
+  const e=loginEmail.value, p=loginPassword.value;
+  const u=usuarios.find(u=>u.email===e && u.pass===p);
+  if(!u) return alert("Datos incorrectos.");
+  usuarioActivo=u;
+  showScreen('menuScreen');
+}
+
+function logout(){
+  usuarioActivo=null; showScreen('loginScreen');
+}
+
+function openSection(sec){
+  const map={imc:'imcScreen',carga:'cargaScreen',rutina:'rutinaScreen',dieta:'dietaScreen',salud:'saludScreen',seguimiento:'seguimientoScreen',config:'configScreen'};
+  showScreen(map[sec]);
+}
+
+function calcularIMC(){
+  const h = parseFloat(altura.value)/100;
+  const p = parseFloat(peso.value);
+  if(!h||!p) return resultadoIMC.textContent="Datos inválidos.";
+  const imc = p/(h*h);
+  imcGlobal=imc;
+  let estado;
+  if(imc<18.5) estado="Bajo peso";
+  else if(imc<25) estado="Peso normal";
+  else if(imc<30) estado="Sobrepeso";
+  else estado="Obesidad";
+  resultadoIMC.innerHTML=`Tu IMC es <b>${imc.toFixed(2)}</b> (${estado})`;
+  generarCargaYRutina(imc);
+}
+
+function generarCargaYRutina(imc){
+  let nivel, carga;
+  if(imc<18.5){nivel="Bajo peso"; carga="cargas ligeras (40–60% de tu peso corporal)";}
+  else if(imc<25){nivel="Peso normal"; carga="moderadas (60–80% de tu peso corporal)";}
+  else if(imc<30){nivel="Sobrepeso"; carga="ligeras (40–55% de tu peso corporal, más repeticiones)";}
+  else {nivel="Obesidad"; carga="muy ligeras o ejercicios de bajo impacto";}
+  cargaTexto.innerHTML=`Tu nivel corporal: <b>${nivel}</b>.<br>Recomendación general: usa ${carga}.`;
+
+  // Rutina personalizada según nivel
+  const rutinas={
+    "Bajo peso":[
+      "Lunes: Piernas (ligero, 3x12)",
+      "Martes: Hombros y Core",
+      "Miércoles: Descanso activo (caminata)",
+      "Jueves: Espalda y bíceps",
+      "Viernes: Pecho y tríceps",
+      "Sábado: Cardio leve",
+      "Domingo: Descanso"
+    ],
+    "Peso normal":[
+      "Lunes: Pecho y tríceps (4x10)",
+      "Martes: Espalda y bíceps (4x10)",
+      "Miércoles: Piernas (4x12)",
+      "Jueves: Hombros y abdomen",
+      "Viernes: Cardio + Core",
+      "Sábado: Full body ligero",
+      "Domingo: Descanso"
+    ],
+    "Sobrepeso":[
+      "Lunes: Caminata + abdomen",
+      "Martes: Piernas (peso corporal)",
+      "Miércoles: Cardio leve",
+      "Jueves: Espalda y brazos",
+      "Viernes: Natación o bicicleta",
+      "Sábado: Estiramientos y core",
+      "Domingo: Descanso"
+    ],
+    "Obesidad":[
+      "Lunes: Caminata 30 min",
+      "Martes: Ejercicios en agua",
+      "Miércoles: Descanso activo",
+      "Jueves: Movilidad y core",
+      "Viernes: Bicicleta suave",
+      "Sábado: Yoga o estiramientos",
+      "Domingo: Descanso"
+    ]
+  };
+  const nivelRutina=imc<18.5?"Bajo peso":imc<25?"Peso normal":imc<30?"Sobrepeso":"Obesidad";
+  rutinaBox.innerHTML="<ul>"+rutinas[nivelRutina].map(r=>`<li>${r}</li>`).join('')+"</ul>";
+}
+
+function generarDieta(){
+  const alerg=alergias.value.toLowerCase();
+  const pref=preferencia.value;
+  if(!pref) return alert("Selecciona una preferencia.");
+  const semana=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+  let comidasBase={
+    normal:["Pollo, arroz y verduras","Atún con ensalada","Carne magra con quinoa","Pescado y papa cocida","Huevos y avena","Ensalada + proteína","Pasta integral y pollo"],
+    vegetariana:["Tofu con arroz","Ensalada con garbanzos","Huevos con espinaca","Lentejas con verduras","Queso panela y ensalada","Omelette vegetal","Sopa de quinoa"],
+    vegana:["Tofu y verduras al vapor","Hamburguesa vegetal","Arroz integral y lentejas","Frijoles y aguacate","Wrap vegetal","Ensalada de garbanzos","Cereal + leche vegetal"]
+  };
+  if(alerg.includes("gluten")) comidasBase[pref]=comidasBase[pref].map(c=>c.replace("pasta","arroz"));
+  if(alerg.includes("lactosa")) comidasBase[pref]=comidasBase[pref].map(c=>c.replace("queso","tofu").replace("leche","bebida vegetal"));
+
+  dietaSemana.innerHTML="<ul>"+semana.map((d,i)=>`<li><b>${d}:</b> ${comidasBase[pref][i]}</li>`).join('')+"</ul>";
+}
+
+function guardarProgreso(){
+  const p=pesoActual.value;
+  mensajeProgreso.textContent=p?`Progreso guardado: ${p} kg`:"Ingresa un peso válido.";
+}
+function actualizarConfig(){
+  mensajeConfig.textContent="Cambios guardados (simulado)";
+}
+</script>
+</body>
+</html>

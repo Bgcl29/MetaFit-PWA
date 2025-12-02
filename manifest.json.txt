@@ -1,0 +1,21 @@
+{
+  "name": "MetaFit App",
+  "short_name": "MetaFit",
+  "start_url": "META-FIT.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#f0b434",
+  "description": "Aplicación fitness para IMC, rutinas, dietas y salud.",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
